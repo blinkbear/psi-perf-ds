@@ -171,21 +171,21 @@ func _queryPerf(perfCollector *PerfCollector, podPid map[string]map[string]strin
 
 func _updatePerfMetricsInPrometheus(podNamespace, podName, container, pid, label string, metricValue *uint64, metricType string) {
 	if metricType == "hw" {
-		hwPerfPromGaugeMap[label].With(prometheus.Labels{"pod_namespace": podNamespace, "pod_name": podName, "container": container, "pid": pid}).Set(float64(*metricValue))
+		hwPerfPromGaugeMap[label].With(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container": container, "pid": pid}).Set(float64(*metricValue))
 	}
 	if metricType == "sw" {
-		swPerfPromGaugeMap[label].With(prometheus.Labels{"pod_namespace": podNamespace, "pod_name": podName, "container": container, "pid": pid}).Set(float64(*metricValue))
+		swPerfPromGaugeMap[label].With(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container": container, "pid": pid}).Set(float64(*metricValue))
 	}
 }
 
 func _deletePerfMetricsInPrometheus(podNamespace, podName, container, pid, label, metricType string) {
 	if metricType == "hw" {
-		hwPerfPromGaugeMap[label].Delete(prometheus.Labels{"pod_namespace": podNamespace, "pod_name": podName, "container": container, "pid": pid})
+		hwPerfPromGaugeMap[label].Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container": container, "pid": pid})
 	}
 	if metricType == "sw" {
-		swPerfPromGaugeMap[label].Delete(prometheus.Labels{"pod_namespace": podNamespace, "pod_name": podName, "container": container, "pid": pid})
+		swPerfPromGaugeMap[label].Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container": container, "pid": pid})
 	}
 	if metricType == "cache" {
-		cachePerfPromGaugeMap[label].Delete(prometheus.Labels{"pod_namespace": podNamespace, "pod_name": podName, "container": container, "pid": pid})
+		cachePerfPromGaugeMap[label].Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container": container, "pid": pid})
 	}
 }
