@@ -33,7 +33,8 @@
 <h3 align="center">CgroupV2 PSI Sidecar</h3>
 
   <p align="center">
-    CgroupV2 PSI Sidecar can be deployed on any kubernetes pod with access to cgroupv2 PSI metrics.
+
+[comment]: <> (    CgroupV2 PSI Sidecar can be deployed on any kubernetes pod with access to cgroupv2 PSI metrics.)
   </p>
 </div>
 
@@ -103,18 +104,18 @@ This is a docker container that can be deployed as a sidecar on any kubernetes p
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To deploy a sidecar follow these simple steps.
+To deploy a sidecar follow these steps.
 
 ### Prerequisites
-
-The host machine for all the nodes on the cluster must be using cgroupv2.
 
 #### Minimum versions:
 * `Docker 20.10`
 * `Linux 5.2`
 * `Kubernetes 1.17`
 
-#### Check Availability
+The host machine for all the nodes on the cluster must be using cgroupv2.
+
+#### Check CgroupV2 Availability
 Ensure that your machine has cgroupv2 available:
 
 ```sh
@@ -154,9 +155,10 @@ If you have cgroupv2 but it isn't enabled the above structure will be available 
 
 #### Enable cgroupv2
 Edit `/etc/default/grub` and add `systemd.unified_cgroup_hierarchy=1` to `GRUB_CMDLINE_LINUX`
+
 Run `sudo update-grub` and reboot the system.
 
-If cgroupv2 is not available on the system you will have to update the kernel version to meet the prerequisites above.
+_If cgroupv2 is not available on the system you will have to update the kernel version to meet the prerequisites above._
 
 ### Build Image
 There are two docker files one for regular deployment and the other for debugging.
@@ -172,7 +174,7 @@ If you want to run the server locally without a container/kubernetes deployment 
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-Assuming all the prerequisites have been met and image built and pushed to your favorite repository follow these steps to deploy the sidecar.
+Assuming all the prerequisites have been met and image built and pushed to your docker repository follow these steps to deploy the sidecar.
 
 In this section I will refer to the monitoring container as the **sidecar** and the container being monitored as the **host** container. 
 The sidecar makes use of the `shareProcessNamespace` option to access the host cgroup metrics.
@@ -310,18 +312,11 @@ cgroup_monitor_sc_monitored_mem_psi{type="some",window="total"} 0
 ```
 
 
-<!-- FAQ -->
-## FAQ
-
-#### Why isn't there any FAQs?
-Because I haven't written this section yet.
-
-#### Will there be FAQs?
-Yes, there will be.
-
-#### When will there be FAQs?
-Soon.
-
+<!-- TODO -->
+## TODO
+- Sidecars may not be needed, and it may be worthwhile to replace it with a dameonset for the cluster.
+- The PID matching algorithm should be improved.
+- The use of go channels is not entirely correct.
 <!-- CONTACT -->
 ## Contact
 
