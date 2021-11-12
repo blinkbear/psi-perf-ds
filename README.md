@@ -171,6 +171,8 @@ If you want to run the server locally without a container/kubernetes deployment 
 1. `docker build -f ./Dockerfile.debug . -t evankrul/cgroup-sc:v.1.2-debug`
 2. `docker push evankrul/cgroup-sc:v.1.2-dubug`
 
+#### Port
+Set `PORT` env var to specify the metrics port.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
@@ -194,7 +196,7 @@ Then just point Prometheus to the `/metrics` endpoint of your pod on the metrics
           - targets: ['cgroup-monitor-sc:2333']
 ```
 
-#### Example kubernetes yaml
+### Example kubernetes yaml
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -277,6 +279,12 @@ spec:
       targetPort: 2333
   type: LoadBalancer
 ```
+### API
+There are a few endpoints:
+- `/` Homepage
+- `/health` K8s health endpoint
+- `/psi` Debugging PSI 
+- `/metrics` Prom metrics+psi endpoint
 
 ## Data Available
 The following PSI metrics are reported to Prometheus and are available for querying.
