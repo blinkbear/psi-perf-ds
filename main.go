@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +15,15 @@ import (
 )
 
 func main() {
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		panic(err.Error())
+	}
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+
 	r := mux.NewRouter()
 	r.HandleFunc("/", HomeHandler)
 	r.HandleFunc("/health", HealthHandler)
@@ -24,16 +36,16 @@ func main() {
 	prometheus.MustRegister(memPsiGauge)
 	prometheus.MustRegister(ioPsiGauge)
 
-	dirChan := make(chan string)
-	psiQueryTicker := time.NewTicker(5 * time.Second)
+	pidChan := make(chan map[string]map[string]string)
 	done := make(chan bool)
-	defer close(dirChan)
+	defer close(pidChan)
 	defer close(done)
-
+	ctx, _ := context.WithCancel(context.Background())
+	psiQueryTicker := time.NewTicker(1 * time.Second)
 	// Lookup mounted file and verify contents match defined hash
-	go findPidDir(dirChan, done)
+	go findPid(pidChan, clientset, ctx, done)
 	// Start go routine to update PSI values
-	go updatePsi(dirChan, psiQueryTicker, done)
+	go updatePsi(pidChan, psiQueryTicker, done)
 
 	port := os.Getenv("PORT")
 	if port == "" {

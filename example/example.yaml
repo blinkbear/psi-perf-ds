@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cgroup-monitor-sc
+  namespace: monitor
+spec:
+  selector:
+    matchLabels: 
+      app: cgroup-monitor
+  template:
+    metadata:
+      labels:
+        app: cgroup-monitor
+    spec:
+      serviceAccountName: cgroup-monitor-sc
+      terminationGracePeriodSeconds: 5
+      shareProcessNamespace: true
+      hostNetwork: true
+      nodeSelector:
+          kubernetes.io/os: linux
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: cgroup-monitor-sc
+          image: t.harbor.siat.ac.cn:100/library/cgroup-sc:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 2333
+              hostPort: 2333
+              protocol: TCP
+              name: metrics
+          securityContext:
+            capabilities:
+              add:
+                - SYS_PTRACE
+          env:
+            - name: PORT
+              value: "2333"
+          resources:
+            requests:
+              cpu: 200m
+              memory: "500Mi"
+            limits:
+              cpu: 200m
+              memory: "1Gi"
+          volumeMounts:
+            - name: dockerpath
+              mountPath: /var/lib/docker
+            - name: procpath
+              mountPath: /root/proc
+      volumes:
+        - name: dockerpath
+          hostPath:
+            path: /var/lib/docker
+            type: Directory
+        - name: procpath
+          hostPath:
+            path: /proc
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cgroup-monitor-service #this will be the Domain name
+  namespace: monitoring
+  labels:
+    app: cgroup-monitor
+spec:
+  selector:
+    app: cgroup-monitor
+  ports:
+    - port: 2333
+      protocol: TCP

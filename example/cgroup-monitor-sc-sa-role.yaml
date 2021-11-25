@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cgroup-monitor-sc
+  namespace: monitor
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cgroup-monitor-sc
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes/proxy
+  - nodes
+  - namespaces
+  - endpoints
+  - pods
+  - services
+  verbs: ["get","list","watch"]
+- apiGroups: [""]
+  resources:
+  - nodes/metrics
+  verbs: ["get"]
+- nonResourceURLs:
+  - /metrics
+  verbs: ["get"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cgroup-monitor-sc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cgroup-monitor-sc
+subjects:
+- kind: ServiceAccount
+  name: cgroup-monitor-sc
+  namespace: monitor

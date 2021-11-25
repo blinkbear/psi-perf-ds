@@ -2,7 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/cgroup-psi-sc" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/git@github.com:evan-krul/cgroup-psi-sc.git" vcs="Git" />
   </component>
 </project>
