@@ -50,6 +50,8 @@ spec:
               mountPath: /var/lib/docker
             - name: procpath
               mountPath: /root/proc
+            - name: cgrouppath
+              mountPath: /root/cgroup
       volumes:
         - name: dockerpath
           hostPath:
@@ -58,6 +60,10 @@ spec:
         - name: procpath
           hostPath:
             path: /proc
+            type: Directory
+        - name: cgrouppath
+          hostPath:
+            path: /sys/fs/cgroup
             type: Directory
 ---
 apiVersion: v1

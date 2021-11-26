@@ -13,12 +13,13 @@ import (
 	"strings"
 )
 
-func ListPods(client *kubernetes.Clientset, ctx context.Context) (map[string][]string, map[string]string) {
+func ListPods(client *kubernetes.Clientset, ctx context.Context) (map[string]string, map[string][]string, map[string]string) {
 	pods, err := client.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
 	podContainers := make(map[string][]string, 0)
+	podNamespaces := make(map[string]string, 0)
 	containerIdToName := make(map[string]string, 0)
 	for _, pod := range pods.Items {
 		containerIds := make([]string, 0)
@@ -31,8 +32,9 @@ func ListPods(client *kubernetes.Clientset, ctx context.Context) (map[string][]s
 			}
 		}
 		podContainers[pod.Name] = containerIds
+		podNamespaces[pod.Name] = pod.Namespace
 	}
-	return podContainers, containerIdToName
+	return podNamespaces, podContainers, containerIdToName
 }
 
 func getPidFromJson(config string) (string, error) {
@@ -48,7 +50,7 @@ func getPidFromJson(config string) (string, error) {
 }
 
 func findPid(pidChan chan map[string]map[string]string, clientset *kubernetes.Clientset, ctx context.Context, done chan bool) {
-	podContainers, containerIdToName := ListPods(clientset, ctx)
+	podNamespaces, podContainers, containerIdToName := ListPods(clientset, ctx)
 	procDir := "/root/proc"
 	baseDir := `/var/lib/docker/containers`
 	files, err := os.ReadDir(baseDir)
@@ -71,7 +73,8 @@ func findPid(pidChan chan map[string]map[string]string, clientset *kubernetes.Cl
 				}
 			}
 		}
-		podPidPath[podName] = containerPid
+		podInfo := podNamespaces[podName] + "/" + podName
+		podPidPath[podInfo] = containerPid
 	}
 	if len(podPidPath) > 0 {
 		pidChan <- podPidPath

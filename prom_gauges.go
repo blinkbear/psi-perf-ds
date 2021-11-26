@@ -10,7 +10,7 @@ var (
 			Name:      "monitored_cpu_psi",
 			Help:      "CPU PSI of monitored container",
 		},
-		[]string{"pod_name", "container_name", "type", "window"})
+		[]string{"namespace", "pod_name", "container_name", "type", "window"})
 
 	memPsiGauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -18,7 +18,7 @@ var (
 			Name:      "monitored_mem_psi",
 			Help:      "Mem PSI of monitored container",
 		},
-		[]string{"pod_name", "container_name", "type", "window"})
+		[]string{"namespace", "pod_name", "container_name", "type", "window"})
 
 	ioPsiGauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -26,5 +26,29 @@ var (
 			Name:      "monitored_io_psi",
 			Help:      "IO PSI of monitored container",
 		},
-		[]string{"pod_name", "container_name", "type", "window"})
+		[]string{"namespace", "pod_name", "container_name", "type", "window"})
+
+	nodeCpuPsiGauge = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "cgroup_monitor_sc",
+			Name:      "monitored_cpu_psi",
+			Help:      "CPU PSI of monitored container",
+		},
+		[]string{"node_name", "type", "window"})
+
+	nodeMemPsiGauge = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "cgroup_monitor_sc",
+			Name:      "monitored_mem_psi",
+			Help:      "Mem PSI of monitored container",
+		},
+		[]string{"node_name", "type", "window"})
+
+	nodeIoPsiGauge = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "cgroup_monitor_sc",
+			Name:      "monitored_io_psi",
+			Help:      "IO PSI of monitored container",
+		},
+		[]string{"node_name", "type", "window"})
 )
