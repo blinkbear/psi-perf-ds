@@ -32,7 +32,7 @@ var (
 		prometheus.GaugeOpts{
 			Namespace: "cgroup_monitor",
 			Name:      "monitored_node_cpu_psi",
-			Help:      "CPU PSI of monitored container",
+			Help:      "CPU PSI of monitored node",
 		},
 		[]string{"type", "window"})
 
@@ -40,7 +40,7 @@ var (
 		prometheus.GaugeOpts{
 			Namespace: "cgroup_monitor",
 			Name:      "monitored_node_mem_psi",
-			Help:      "Mem PSI of monitored container",
+			Help:      "Mem PSI of monitored node",
 		},
 		[]string{"type", "window"})
 
@@ -48,7 +48,7 @@ var (
 		prometheus.GaugeOpts{
 			Namespace: "cgroup_monitor",
 			Name:      "monitored_node_io_psi",
-			Help:      "IO PSI of monitored container",
+			Help:      "IO PSI of monitored node",
 		},
 		[]string{"type", "window"})
 )

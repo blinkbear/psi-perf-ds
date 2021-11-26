@@ -28,15 +28,18 @@ func _queryNodePsi() {
 	basePsiDir := "/root/cgroup/"
 	//basePsiDir := nodePidPath["basePsiDir"]
 	cpuPsi, err := os.ReadFile(basePsiDir + `/cpu.pressure`)
-	if check(&err) {
+	if err != nil {
+		klog.Errorf("Failed to read cpu.pressure: %v", err)
 		return
 	}
 	memPsi, err := os.ReadFile(basePsiDir + `/memory.pressure`)
-	if check(&err) {
+	if err != nil {
+		klog.Errorf("Failed to read mem.pressure: %v", err)
 		return
 	}
 	ioPsi, err := os.ReadFile(basePsiDir + `/io.pressure`)
-	if check(&err) {
+	if err != nil {
+		klog.Errorf("Failed to read io.pressure: %v", err)
 		return
 	}
 

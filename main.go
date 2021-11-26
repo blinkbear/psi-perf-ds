@@ -35,6 +35,9 @@ func main() {
 	prometheus.MustRegister(cpuPsiGauge)
 	prometheus.MustRegister(memPsiGauge)
 	prometheus.MustRegister(ioPsiGauge)
+	prometheus.MustRegister(nodeCpuPsiGauge)
+	prometheus.MustRegister(nodeMemPsiGauge)
+	prometheus.MustRegister(nodeIoPsiGauge)
 
 	pidChan := make(chan map[string]map[string]string)
 	done := make(chan bool)
