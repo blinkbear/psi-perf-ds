@@ -34,7 +34,7 @@ var (
 			Name:      "monitored_cpu_psi",
 			Help:      "CPU PSI of monitored container",
 		},
-		[]string{"node_name", "type", "window"})
+		[]string{"type", "window"})
 
 	nodeMemPsiGauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -42,7 +42,7 @@ var (
 			Name:      "monitored_mem_psi",
 			Help:      "Mem PSI of monitored container",
 		},
-		[]string{"node_name", "type", "window"})
+		[]string{"type", "window"})
 
 	nodeIoPsiGauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -50,5 +50,5 @@ var (
 			Name:      "monitored_io_psi",
 			Help:      "IO PSI of monitored container",
 		},
-		[]string{"node_name", "type", "window"})
+		[]string{"type", "window"})
 )
