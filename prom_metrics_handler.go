@@ -10,14 +10,12 @@ import (
 	"time"
 )
 
-func updatePsi(pidChan chan map[string]map[string]string, ticker *time.Ticker, done chan bool) {
-	podPidPath := <-pidChan
+func updatePsi(localcache *Cache) {
+	psiQueryTicker := time.NewTicker(1 * time.Second)
 	for {
 		select {
-		case <-done:
-			klog.Infof("done")
-			return
-		case <-ticker.C:
+		case <-psiQueryTicker.C:
+			podPidPath := localcache.GetAllPodInfo()
 			_queryNodePsi()
 			_queryPsi(podPidPath)
 		}
@@ -102,7 +100,6 @@ func _queryNodePsi() {
 
 func _queryPsi(podPidPath map[string]map[string]string) {
 	for podInfo, containerPath := range podPidPath {
-		//klog.Infof("query psi for pod %s", podName)
 		podInfos := strings.Split(podInfo, "/")
 		podNamespace := podInfos[0]
 		podName := podInfos[1]
@@ -181,4 +178,40 @@ func _queryPsi(podPidPath map[string]map[string]string) {
 		}
 	}
 
+}
+
+func deletePsi(podInfo string, deleteItems map[string]string) {
+	podInfos := strings.Split(podInfo, "/")
+	podNamespace := podInfos[0]
+	podName := podInfos[1]
+	for container, _ := range deleteItems {
+		if cpuPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "10s"}) == true {
+			klog.Infof("delete cpu some 10s for %s/%s/%s", podNamespace, podName, container)
+		} else {
+			klog.Infof("delete cpu some 10s for %s/%s/%s failed", podNamespace, podName, container)
+		}
+		cpuPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "60s"})
+		cpuPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "300s"})
+		cpuPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "total"})
+
+		memPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "10s"})
+		memPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "60s"})
+		memPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "300s"})
+		memPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "total"})
+
+		memPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "full", "window": "10s"})
+		memPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "full", "window": "60s"})
+		memPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "full", "window": "300s"})
+		memPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "full", "window": "total"})
+
+		ioPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "10s"})
+		ioPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "60s"})
+		ioPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "300s"})
+		ioPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "total"})
+
+		ioPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "full", "window": "10s"})
+		ioPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "full", "window": "60s"})
+		ioPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "full", "window": "300s"})
+		ioPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "full", "window": "total"})
+	}
 }

@@ -1,13 +1,16 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/klog/v2"
 	"log"
 	"net/http"
 	"os"
@@ -19,41 +22,94 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
+	client := kubernetes.NewForConfigOrDie(config)
+	factory := informers.NewSharedInformerFactory(client, time.Duration(5)*time.Second)
+	podInformer := factory.Core().V1().Pods().Informer()
 
-	r := mux.NewRouter()
-	r.HandleFunc("/", HomeHandler)
-	r.HandleFunc("/health", HealthHandler)
-	r.HandleFunc("/psi", PsiHandler)
-	r.Handle("/metrics", promhttp.Handler())
-	http.Handle("/", r)
+	localcache := NewCache()
+	nodeName := os.Getenv("NODE_NAME")
+	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			newPod := obj.(*v1.Pod)
+			if newPod.Spec.NodeName == nodeName {
+				addFunc(newPod, localcache)
+			}
+		},
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			oldPod := oldObj.(*v1.Pod)
+			newPod := newObj.(*v1.Pod)
+			if oldPod.ResourceVersion == newPod.ResourceVersion {
+				return
+			}
+			if newPod.DeletionTimestamp != nil {
+				klog.Infof("Pod %s deleting", newPod.Name)
+				deleteFunc(newPod, localcache)
+				klog.Infof("Pod %s deleted", newPod.Name)
+			}
+			if newPod.Spec.NodeName == nodeName {
+				updateFunc(newPod, localcache)
+			}
 
-	// Register metrics
-	prometheus.MustRegister(cpuPsiGauge)
-	prometheus.MustRegister(memPsiGauge)
-	prometheus.MustRegister(ioPsiGauge)
-	prometheus.MustRegister(nodeCpuPsiGauge)
-	prometheus.MustRegister(nodeMemPsiGauge)
-	prometheus.MustRegister(nodeIoPsiGauge)
+		},
+		DeleteFunc: func(obj interface{}) {
+			deletePod := obj.(*v1.Pod)
+			deleteFunc(deletePod, localcache)
+		},
+	})
+	stopCh := make(chan struct{})
+	defer close(stopCh)
+	factory.Start(stopCh)
+	factory.WaitForCacheSync(stopCh)
 
-	pidChan := make(chan map[string]map[string]string)
-	done := make(chan bool)
-	defer close(pidChan)
-	defer close(done)
-	ctx, _ := context.WithCancel(context.Background())
-	psiQueryTicker := time.NewTicker(1 * time.Second)
-	// Lookup mounted file and verify contents match defined hash
-	go findPid(pidChan, clientset, ctx, done)
 	// Start go routine to update PSI values
-	go updatePsi(pidChan, psiQueryTicker, done)
-
+	go updatePsi(localcache)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8888"
 	}
+
 	fmt.Printf("Listening on port %s\n", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	go func() {
+		r := mux.NewRouter()
+		r.HandleFunc("/", HomeHandler)
+		r.HandleFunc("/health", HealthHandler)
+		r.HandleFunc("/psi", PsiHandler)
+		r.Handle("/metrics", promhttp.Handler())
+		http.Handle("/", r)
+		// Register metrics
+		prometheus.MustRegister(cpuPsiGauge)
+		prometheus.MustRegister(memPsiGauge)
+		prometheus.MustRegister(ioPsiGauge)
+		prometheus.MustRegister(nodeCpuPsiGauge)
+		prometheus.MustRegister(nodeMemPsiGauge)
+		prometheus.MustRegister(nodeIoPsiGauge)
+		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	}()
+	klog.Infof("Start to server")
+	<-stopCh
+}
+
+func addFunc(newPod *v1.Pod, localcache *Cache) {
+	klog.Infof("Pod %s/%s adding", newPod.Namespace, newPod.Name)
+	status := newPod.Status.Phase
+	if status != v1.PodRunning {
+		return
+	}
+	findPid(localcache, newPod)
+	klog.Infof("Pod %s/%s added", newPod.Namespace, newPod.Name)
+}
+
+func updateFunc(newPod *v1.Pod, localcache *Cache) {
+	status := newPod.Status.Phase
+	if status != v1.PodRunning {
+		return
+	}
+	findPid(localcache, newPod)
+}
+
+func deleteFunc(deletePod *v1.Pod, localcache *Cache) {
+	podName := deletePod.Name
+	podNamespace := deletePod.Namespace
+	podInfo := podNamespace + "/" + podName
+	removePid(localcache, podInfo)
 }
