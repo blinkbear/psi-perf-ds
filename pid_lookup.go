@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/klog/v2"
 	"os"
 	"strconv"
 	"strings"
+
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog/v2"
 )
 
 func ListPods(pod *v1.Pod) ([]string, map[string]string) {
@@ -37,21 +38,23 @@ func getPidFromJson(config string) (string, error) {
 	return pid, nil
 }
 
-func removePid(localcache *Cache, podInfo string) {
-	deleteItem := localcache.DeletePodInfo(podInfo)
-	deletePsi(podInfo, deleteItem)
+func removePid(localcache *Cache, podInfo string) map[string]string {
+	deletePathItem, deletePidItem := localcache.DeletePodInfo(podInfo)
+	deletePsi(podInfo, deletePathItem)
+	return deletePidItem
 }
 
 func findPid(localcache *Cache, pod *v1.Pod) {
 	containerIds, containerIdToName := ListPods(pod)
 	procDir := "/root/proc"
-	baseDir := `/var/lib/docker/containers`
+	baseDir := `/root/docker/containers`
 	files, err := os.ReadDir(baseDir)
 	if err != nil {
 		klog.Errorf("Fail to read dir %s", baseDir)
 		return
 	}
 	podInfo := pod.Namespace + "/" + pod.Name
+	containerPidPath := make(map[string]string, 0)
 	containerPid := make(map[string]string, 0)
 	for _, containerId := range containerIds {
 		for _, file := range files {
@@ -63,10 +66,11 @@ func findPid(localcache *Cache, pod *v1.Pod) {
 				}
 				pid, err := getPidFromJson(string(config))
 				path := fmt.Sprintf("%s/%s/root/sys/fs/cgroup", procDir, pid)
-				containerPid[containerIdToName[containerId]] = path
+				containerPidPath[containerIdToName[containerId]] = path
+				containerPid[containerIdToName[containerId]] = pid
 			}
 		}
 	}
-	localcache.AddNewPod(podInfo, containerPid)
+	localcache.AddNewPodInfo(podInfo, containerPid, containerPidPath)
 	return
 }

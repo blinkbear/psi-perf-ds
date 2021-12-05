@@ -10,4 +10,4 @@
 #CMD ["cgroup-sc"]
 FROM ubuntu
 COPY cgroup-psi-sc /usr/bin/cgroup-psi-sc
-CMD ["cgroup-psi-sc"]
+ENTRYPOINT ["cgroup-psi-sc"]
