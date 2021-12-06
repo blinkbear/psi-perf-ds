@@ -30,7 +30,7 @@
     <img src="https://golang.org/lib/godoc/images/go-logo-blue.svg" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">CgroupV2 PSI Daemonset</h3>
+<h3 align="center">CgroupV2 PSI and Perf Daemonset</h3>
 
   <p align="center">
 
@@ -182,6 +182,21 @@ The daemonset loads `/proc` and `/var/lib/docker` directories. It finds the cont
 
 The service is used to expose the daemonset webserver where the metrics are hosted.
 If you are not using some kind of service mesh make sure your Prometheus deployment is on the same namespace as your daemonset deployment.
+
+**perf collector** is implement based on [perf-utils v0.4.0](https://github.com/hodgesds/perf-utils/tree/v0.4.0). In this project, we exposed the performance information for each container process in one host. If you want to query the total performance of one host, please refer to [node_exporter](https://github.com/prometheus/node_exporter#disabled-by-default).
+
+In order to collect perf, we should keep the daemonset as an administrator, and share the host pid with container. These configuration can be set in pod YAML file, as a `spec.hostPid` and `spec.containers.securityContext`. The example.yaml shows how to configure them.
+
+Because the cost of perf collector is high, so we set an switch to enable and disable perf collector. And you can also set which perf metric should be collected. All of the supported perf metrics can be seen in project [perf-utils](https://github.com/hodgesds/perf-utils/tree/v0.4.0)
+
+```yaml
+      - name: PERF_COLLECTOR_ENABLED
+        value: "true"
+      - name: HW_PERF_LABELS
+        value: "Instructions"
+```
+
+
 Then just point Prometheus to the `/metrics` endpoint of your pod on the metrics port.
 
 ```yaml
@@ -220,6 +235,24 @@ There are a few endpoints:
 ## Data Available
 The following PSI metrics are reported to Prometheus and are available for querying.
 ```
+# HELP cgroup_monitor_cpu_cycles CPU migration of monitored container
+# TYPE cgroup_monitor_cpu_cycles gauge
+cgroup_monitor_cpu_cycles{container_name="cgroup-monitor-sc",namespace="monitor",pid="5275",pod_name="cgroup-monitor-sc-nw78c"} 2.6810185e+07
+cgroup_monitor_cpu_cycles{container_name="etcd",namespace="kube-system",pid="31708",pod_name="etcd-crack-bedbug"} 5.949181e+06
+cgroup_monitor_cpu_cycles{container_name="kube-apiserver",namespace="kube-system",pid="31318",pod_name="kube-apiserver-crack-bedbug"} 0
+cgroup_monitor_cpu_cycles{container_name="kube-controller-manager",namespace="kube-system",pid="31809",pod_name="kube-controller-manager-crack-bedbug"} 1.887559e+07
+cgroup_monitor_cpu_cycles{container_name="kube-flannel",namespace="kube-system",pid="32265",pod_name="kube-flannel-ds-amd64-cszlv"} 3.4171708e+07
+cgroup_monitor_cpu_cycles{container_name="kube-scheduler",namespace="kube-system",pid="32102",pod_name="kube-scheduler-crack-bedbug"} 0
+cgroup_monitor_cpu_cycles{container_name="node-exporter",namespace="monitor",pid="22435",pod_name="prometheus-prometheus-node-exporter-jgtv7"} 2.89654836e+08
+# HELP cgroup_monitor_instruction instruction of monitored container
+# TYPE cgroup_monitor_instruction gauge
+cgroup_monitor_instruction{container_name="cgroup-monitor-sc",namespace="monitor",pid="5275",pod_name="cgroup-monitor-sc-nw78c"} 5.0756236e+07
+cgroup_monitor_instruction{container_name="etcd",namespace="kube-system",pid="31708",pod_name="etcd-crack-bedbug"} 1.2358213e+07
+cgroup_monitor_instruction{container_name="kube-apiserver",namespace="kube-system",pid="31318",pod_name="kube-apiserver-crack-bedbug"} 0
+cgroup_monitor_instruction{container_name="kube-controller-manager",namespace="kube-system",pid="31809",pod_name="kube-controller-manager-crack-bedbug"} 1.5420931e+07
+cgroup_monitor_instruction{container_name="kube-flannel",namespace="kube-system",pid="32265",pod_name="kube-flannel-ds-amd64-cszlv"} 5.9731916e+07
+cgroup_monitor_instruction{container_name="kube-scheduler",namespace="kube-system",pid="32102",pod_name="kube-scheduler-crack-bedbug"} 0
+cgroup_monitor_instruction{container_name="node-exporter",namespace="monitor",pid="22435",pod_name="prometheus-prometheus-node-exporter-jgtv7"} 1.89660562e+08
 # HELP cgroup_monitor_sc_monitored_cpu_psi CPU PSI of monitored container
 # TYPE cgroup_monitor_sc_monitored_cpu_psi gauge
 cgroup_monitor_sc_monitored_cpu_psi{container_name="carts",instance="172.169.8.219",job="cgroup-monitor",pod_name="carts-677b598f6f-lb9zn",type="some",window="10s"} 0
