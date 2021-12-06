@@ -45,6 +45,7 @@ func startLoader() (map[string][]string, bool) {
 		}
 		truelyHwPerfLabels = append(truelyHwPerfLabels, label)
 	}
+
 	for _, label := range swPerfLabels {
 		if !stringInSlice(label, availableSwPerfLabels) {
 			klog.Warningf("SW perf label %s is not available", label)

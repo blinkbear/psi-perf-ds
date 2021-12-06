@@ -36,7 +36,7 @@ func startPerfCollector(perfCollector *PerfCollector, podInfo string, containerP
 		}
 		perfProfiler := &PerfProfiler{}
 		if len(perfLabels["hw"]) != 0 {
-			hwprofiler, err := perf_collector.NewHardwareProfiler(-1, 1)
+			hwprofiler, err := perf_collector.NewHardwareProfiler(pid, 1)
 			if err != nil {
 				klog.Errorf("start hardware PerfCollector: %v\n", err)
 			}

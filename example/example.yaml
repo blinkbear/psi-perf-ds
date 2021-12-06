@@ -14,7 +14,7 @@ spec:
     spec:
       serviceAccountName: cgroup-monitor-sc
       terminationGracePeriodSeconds: 5
-      shareProcessNamespace: true
+      hostPid: true
       hostNetwork: true
       nodeSelector:
           kubernetes.io/os: linux
