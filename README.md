@@ -187,8 +187,19 @@ If you are not using some kind of service mesh make sure your Prometheus deploym
 
 In order to collect perf, we should keep the daemonset as an administrator, and share the host pid with container. These configuration can be set in pod YAML file, as a `spec.hostPid` and `spec.containers.securityContext`. The example.yaml shows how to configure them.
 
-Because the cost of perf collector is high, so we set an switch to enable and disable perf collector. And you can also set which perf metric should be collected. All of the supported perf metrics can be seen in project [perf-utils](https://github.com/hodgesds/perf-utils/tree/v0.4.0)
+Because the cost of perf collector is high, so we set an switch to enable and disable perf collector. And you can also set which perf metric should be collected. All of the supported perf metrics can be seen in project [perf-utils](https://github.com/hodgesds/perf-utils/blob/0517eb74ee7dd94e10d33088cac0df2f3342fd86/process_profile.go#L48), as follows
 
+Available HW_PERF_LABELS 
+`CPUCycles,Instructions,CacheRefs,CacheMisses,BranchInstr,BranchMisses,BusCycles,StalledCyclesFrontend,StalledCyclesBackend,RefCPUCycles,TimeEnabled,TimeRunning`
+
+Available SW_PERF_LABELS 
+`CPUClock,TaskClock,PageFaults,ContextSwitches,CPUMigrations,MinorPageFaults,MajorPageFaults,AlignmentFaults,EmulationFaults,TimeEnabled,TimeRunning`
+
+Available CACHE_PERF_LABELS
+
+`L1DataReadHit,L1DataReadMiss,L1DataWriteHit,L1InstrReadMiss,LastLevelReadHit,LastLevelReadMiss,LastLevelWriteHit,LastLevelWriteMiss,DataTLBReadHit,DataTLBReadMiss,DataTLBWriteHit,DataTLBWriteMiss,InstrTLBReadHit,InstrTLBReadMiss,BPUReadHit,BPUReadMiss,NodeReadHit,NodeReadMiss,NodeWriteHit,NodeWriteMiss,TimeEnabled,TimeRunning`
+
+The fields in the yaml file are as follows:
 ```yaml
       - name: PERF_COLLECTOR_ENABLED
         value: "true"
