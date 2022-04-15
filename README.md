@@ -211,7 +211,7 @@ The fields in the yaml file are as follows:
 Then just point Prometheus to the `/metrics` endpoint of your pod on the metrics port.
 
 ```yaml
-- job_name:  'cgroup-monitor'
+- job_name:  'psi-perf'
     kubernetes_sd_configs:
       - role: endpoints
     scheme: http
@@ -246,53 +246,53 @@ There are a few endpoints:
 ## Data Available
 The following PSI metrics are reported to Prometheus and are available for querying.
 ```
-# HELP cgroup_monitor_cpu_cycles CPU migration of monitored container
-# TYPE cgroup_monitor_cpu_cycles gauge
-cgroup_monitor_cpu_cycles{container_name="cgroup-monitor-sc",namespace="monitor",pid="5275",pod_name="cgroup-monitor-sc-nw78c"} 2.6810185e+07
-cgroup_monitor_cpu_cycles{container_name="etcd",namespace="kube-system",pid="31708",pod_name="etcd-crack-bedbug"} 5.949181e+06
-cgroup_monitor_cpu_cycles{container_name="kube-apiserver",namespace="kube-system",pid="31318",pod_name="kube-apiserver-crack-bedbug"} 0
-cgroup_monitor_cpu_cycles{container_name="kube-controller-manager",namespace="kube-system",pid="31809",pod_name="kube-controller-manager-crack-bedbug"} 1.887559e+07
-cgroup_monitor_cpu_cycles{container_name="kube-flannel",namespace="kube-system",pid="32265",pod_name="kube-flannel-ds-amd64-cszlv"} 3.4171708e+07
-cgroup_monitor_cpu_cycles{container_name="kube-scheduler",namespace="kube-system",pid="32102",pod_name="kube-scheduler-crack-bedbug"} 0
-cgroup_monitor_cpu_cycles{container_name="node-exporter",namespace="monitor",pid="22435",pod_name="prometheus-prometheus-node-exporter-jgtv7"} 2.89654836e+08
-# HELP cgroup_monitor_instruction instruction of monitored container
-# TYPE cgroup_monitor_instruction gauge
-cgroup_monitor_instruction{container_name="cgroup-monitor-sc",namespace="monitor",pid="5275",pod_name="cgroup-monitor-sc-nw78c"} 5.0756236e+07
-cgroup_monitor_instruction{container_name="etcd",namespace="kube-system",pid="31708",pod_name="etcd-crack-bedbug"} 1.2358213e+07
-cgroup_monitor_instruction{container_name="kube-apiserver",namespace="kube-system",pid="31318",pod_name="kube-apiserver-crack-bedbug"} 0
-cgroup_monitor_instruction{container_name="kube-controller-manager",namespace="kube-system",pid="31809",pod_name="kube-controller-manager-crack-bedbug"} 1.5420931e+07
-cgroup_monitor_instruction{container_name="kube-flannel",namespace="kube-system",pid="32265",pod_name="kube-flannel-ds-amd64-cszlv"} 5.9731916e+07
-cgroup_monitor_instruction{container_name="kube-scheduler",namespace="kube-system",pid="32102",pod_name="kube-scheduler-crack-bedbug"} 0
-cgroup_monitor_instruction{container_name="node-exporter",namespace="monitor",pid="22435",pod_name="prometheus-prometheus-node-exporter-jgtv7"} 1.89660562e+08
-# HELP cgroup_monitor_sc_monitored_cpu_psi CPU PSI of monitored container
-# TYPE cgroup_monitor_sc_monitored_cpu_psi gauge
-cgroup_monitor_sc_monitored_cpu_psi{container_name="carts",instance="172.169.8.219",job="cgroup-monitor",pod_name="carts-677b598f6f-lb9zn",type="some",window="10s"} 0
-cgroup_monitor_sc_monitored_cpu_psi{container_name="carts",instance="172.169.8.219",job="cgroup-monitor",pod_name="carts-677b598f6f-lb9zn",type="some",window="300s"} 0
-cgroup_monitor_sc_monitored_cpu_psi{container_name="carts",instance="172.169.8.219",job="cgroup-monitor",pod_name="carts-677b598f6f-lb9zn",type="some",window="60s"} 0
-cgroup_monitor_sc_monitored_cpu_psi{container_name="carts",instance="172.169.8.219",job="cgroup-monitor",pod_name="carts-677b598f6f-lb9zn",type="some",window="total"} 328157795
+# HELP psi_perf_monitor_cpu_cycles CPU migration of monitored container
+# TYPE psi_perf_monitor_cpu_cycles gauge
+psi_perf_monitor_cpu_cycles{container_name="cgroup-monitor-sc",namespace="monitor",pid="5275",pod_name="cgroup-monitor-sc-nw78c"} 2.6810185e+07
+psi_perf_monitor_cpu_cycles{container_name="etcd",namespace="kube-system",pid="31708",pod_name="etcd-crack-bedbug"} 5.949181e+06
+psi_perf_monitor_cpu_cycles{container_name="kube-apiserver",namespace="kube-system",pid="31318",pod_name="kube-apiserver-crack-bedbug"} 0
+psi_perf_monitor_cpu_cycles{container_name="kube-controller-manager",namespace="kube-system",pid="31809",pod_name="kube-controller-manager-crack-bedbug"} 1.887559e+07
+psi_perf_monitor_cpu_cycles{container_name="kube-flannel",namespace="kube-system",pid="32265",pod_name="kube-flannel-ds-amd64-cszlv"} 3.4171708e+07
+psi_perf_monitor_cpu_cycles{container_name="kube-scheduler",namespace="kube-system",pid="32102",pod_name="kube-scheduler-crack-bedbug"} 0
+psi_perf_monitor_cpu_cycles{container_name="node-exporter",namespace="monitor",pid="22435",pod_name="prometheus-prometheus-node-exporter-jgtv7"} 2.89654836e+08
+# HELP psi_perf_monitor_instruction instruction of monitored container
+# TYPE psi_perf_monitor_instruction gauge
+psi_perf_monitor_instruction{container_name="cgroup-monitor-sc",namespace="monitor",pid="5275",pod_name="cgroup-monitor-sc-nw78c"} 5.0756236e+07
+psi_perf_monitor_instruction{container_name="etcd",namespace="kube-system",pid="31708",pod_name="etcd-crack-bedbug"} 1.2358213e+07
+psi_perf_monitor_instruction{container_name="kube-apiserver",namespace="kube-system",pid="31318",pod_name="kube-apiserver-crack-bedbug"} 0
+psi_perf_monitor_instruction{container_name="kube-controller-manager",namespace="kube-system",pid="31809",pod_name="kube-controller-manager-crack-bedbug"} 1.5420931e+07
+psi_perf_monitor_instruction{container_name="kube-flannel",namespace="kube-system",pid="32265",pod_name="kube-flannel-ds-amd64-cszlv"} 5.9731916e+07
+psi_perf_monitor_instruction{container_name="kube-scheduler",namespace="kube-system",pid="32102",pod_name="kube-scheduler-crack-bedbug"} 0
+psi_perf_monitor_instruction{container_name="node-exporter",namespace="monitor",pid="22435",pod_name="prometheus-prometheus-node-exporter-jgtv7"} 1.89660562e+08
+# HELP psi_perf_monitor_sc_monitored_cpu_psi CPU PSI of monitored container
+# TYPE psi_perf_monitor_sc_monitored_cpu_psi gauge
+psi_perf_monitor_sc_monitored_cpu_psi{container_name="carts",instance="172.169.8.219",job="cgroup-monitor",pod_name="carts-677b598f6f-lb9zn",type="some",window="10s"} 0
+psi_perf_monitor_sc_monitored_cpu_psi{container_name="carts",instance="172.169.8.219",job="cgroup-monitor",pod_name="carts-677b598f6f-lb9zn",type="some",window="300s"} 0
+psi_perf_monitor_sc_monitored_cpu_psi{container_name="carts",instance="172.169.8.219",job="cgroup-monitor",pod_name="carts-677b598f6f-lb9zn",type="some",window="60s"} 0
+psi_perf_monitor_sc_monitored_cpu_psi{container_name="carts",instance="172.169.8.219",job="cgroup-monitor",pod_name="carts-677b598f6f-lb9zn",type="some",window="total"} 328157795
 
-# HELP cgroup_monitor_sc_monitored_io_psi IO PSI of monitored container
-# TYPE cgroup_monitor_sc_monitored_io_psi gauge
+# HELP psi_perf_monitor_sc_monitored_io_psi IO PSI of monitored container
+# TYPE psi_perf_monitor_sc_monitored_io_psi gauge
 
-cgroup_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="10s"} 0
-cgroup_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="300s"} 0
-cgroup_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="60s"} 0
-cgroup_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="total"} 69165
-cgroup_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="10s"} 0
-cgroup_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="300s"} 0
-cgroup_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="60s"} 0
-cgroup_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="total"} 69210
+psi_perf_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="10s"} 0
+psi_perf_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="300s"} 0
+psi_perf_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="60s"} 0
+psi_perf_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="total"} 69165
+psi_perf_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="10s"} 0
+psi_perf_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="300s"} 0
+psi_perf_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="60s"} 0
+psi_perf_monitor_sc_monitored_io_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="total"} 69210
 
-# HELP cgroup_monitor_sc_monitored_mem_psi Mem PSI of monitored container
-# TYPE cgroup_monitor_sc_monitored_mem_psi gauge
-cgroup_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="10s"} 0
-cgroup_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="300s"} 0
-cgroup_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="60s"} 0
-cgroup_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="total"} 0
-cgroup_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="10s"} 0
-cgroup_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="300s"} 0
-cgroup_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="60s"} 0
-cgroup_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="total"} 0
+# HELP psi_perf_monitor_sc_monitored_mem_psi Mem PSI of monitored container
+# TYPE psi_perf_monitor_sc_monitored_mem_psi gauge
+psi_perf_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="10s"} 0
+psi_perf_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="300s"} 0
+psi_perf_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="60s"} 0
+psi_perf_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="full", window="total"} 0
+psi_perf_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="10s"} 0
+psi_perf_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="300s"} 0
+psi_perf_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="60s"} 0
+psi_perf_monitor_sc_monitored_mem_psi{container_name="carts", instance="172.169.8.219", job="cgroup-monitor", pod_name="carts-677b598f6f-lb9zn", type="some", window="total"} 0
 ```
 
 

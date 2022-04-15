@@ -11,32 +11,32 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func updatePsi(localcache *Cache) {
-	psiQueryTicker := time.NewTicker(5 * time.Second)
+func updatePsi(localcache *Cache, cgroupBaseDir string, interval int) {
+	psiQueryTicker := time.NewTicker(time.Duration(interval) * time.Second)
 	for {
 		select {
 		case <-psiQueryTicker.C:
 			podPidPath := localcache.GetAllPodPathInfo()
-			_queryNodePsi()
+			_queryNodePsi(cgroupBaseDir)
 			_queryPsi(podPidPath)
 		}
 	}
 }
 
-func _queryNodePsi() {
-	basePsiDir := "/root/cgroup/"
+func _queryNodePsi(cgroupBaseDir string) {
+	// cgroupBaseDir := "/root/cgroup/"
 	//basePsiDir := nodePidPath["basePsiDir"]
-	cpuPsi, err := os.ReadFile(basePsiDir + `/cpu.pressure`)
+	cpuPsi, err := os.ReadFile(cgroupBaseDir + `/cpu.pressure`)
 	if err != nil {
 		klog.Errorf("Failed to read cpu.pressure: %v", err)
 		return
 	}
-	memPsi, err := os.ReadFile(basePsiDir + `/memory.pressure`)
+	memPsi, err := os.ReadFile(cgroupBaseDir + `/memory.pressure`)
 	if err != nil {
 		klog.Errorf("Failed to read mem.pressure: %v", err)
 		return
 	}
-	ioPsi, err := os.ReadFile(basePsiDir + `/io.pressure`)
+	ioPsi, err := os.ReadFile(cgroupBaseDir + `/io.pressure`)
 	if err != nil {
 		klog.Errorf("Failed to read io.pressure: %v", err)
 		return
@@ -105,20 +105,20 @@ func _queryPsi(podPidPath map[string]map[string]string) {
 		podNamespace := podInfos[0]
 		podName := podInfos[1]
 		for container, path := range containerPath {
-			basePsiDir := path
-			cpuPsi, err := os.ReadFile(basePsiDir + `/cpu.pressure`)
+			cgroupBaseDir := path
+			cpuPsi, err := os.ReadFile(cgroupBaseDir + `/cpu.pressure`)
 			if err != nil {
-				klog.V(3).Infof("Failed to read cpu psi files %v,error is %v", basePsiDir, err)
+				klog.V(3).Infof("Failed to read cpu psi files %v,error is %v", cgroupBaseDir, err)
 				return
 			}
-			memPsi, err := os.ReadFile(basePsiDir + `/memory.pressure`)
+			memPsi, err := os.ReadFile(cgroupBaseDir + `/memory.pressure`)
 			if err != nil {
-				klog.V(3).Infof("Failed to read mem psi files %v,error is %v", basePsiDir, err)
+				klog.V(3).Infof("Failed to read mem psi files %v,error is %v", cgroupBaseDir, err)
 				return
 			}
-			ioPsi, err := os.ReadFile(basePsiDir + `/io.pressure`)
+			ioPsi, err := os.ReadFile(cgroupBaseDir + `/io.pressure`)
 			if err != nil {
-				klog.V(3).Infof("Failed to read io psi files %v,error is %v", basePsiDir, err)
+				klog.V(3).Infof("Failed to read io psi files %v,error is %v", cgroupBaseDir, err)
 				return
 			}
 
@@ -186,7 +186,7 @@ func deletePsi(podInfo string, deleteItems map[string]string) {
 	podNamespace := podInfos[0]
 	podName := podInfos[1]
 	for container, _ := range deleteItems {
-		if cpuPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "10s"}) == true {
+		if cpuPsiGauge.Delete(prometheus.Labels{"namespace": podNamespace, "pod_name": podName, "container_name": container, "type": "some", "window": "10s"}) {
 			klog.Infof("delete cpu some 10s for %s/%s/%s", podNamespace, podName, container)
 		} else {
 			klog.Infof("delete cpu some 10s for %s/%s/%s failed", podNamespace, podName, container)

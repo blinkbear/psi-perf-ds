@@ -1,13 +1,13 @@
-#FROM golang:1.17
-#
-#WORKDIR /go/src/app
-#COPY . .
-#
-#RUN go env -w  GOPROXY=https://goproxy.cn,direct
-#RUN go get -d -v ./...
-#RUN go build -v ./...
-#RUN mv ./cgroup-sc /usr/bin/
-#CMD ["cgroup-sc"]
+FROM golang:1.17 AS builder
+
+WORKDIR /go/src/app
+COPY . .
+
+# RUN go env -w  GOPROXY=https://goproxy.cn,direct
+RUN go get -d -v ./...
+RUN go build -v ./...
+RUN mv ./psi-perf-ds /root/
+
 FROM ubuntu
-COPY cgroup-psi-sc /usr/bin/cgroup-psi-sc
-ENTRYPOINT ["cgroup-psi-sc"]
+COPY --from=builder /root/psi-perf-ds /usr/bin/psi-perf-ds
+ENTRYPOINT ["psi-perf-ds"]

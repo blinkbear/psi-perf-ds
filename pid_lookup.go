@@ -44,13 +44,13 @@ func removePid(localcache *Cache, podInfo string) map[string]string {
 	return deletePidItem
 }
 
-func findPid(localcache *Cache, pod *v1.Pod) {
+func findPid(localcache *Cache, pod *v1.Pod, procBaseDir string, dockerBaseDir string) {
 	containerIds, containerIdToName := ListPods(pod)
-	procDir := "/root/proc"
-	baseDir := `/root/docker/containers`
-	files, err := os.ReadDir(baseDir)
+	// procBaseDir := "/root/proc"
+	containerBaseDir := dockerBaseDir + "/containers"
+	files, err := os.ReadDir(containerBaseDir)
 	if err != nil {
-		klog.Errorf("Fail to read dir %s", baseDir)
+		klog.Errorf("Fail to read dir %s", containerBaseDir)
 		return
 	}
 	podInfo := pod.Namespace + "/" + pod.Name
@@ -59,18 +59,20 @@ func findPid(localcache *Cache, pod *v1.Pod) {
 	for _, containerId := range containerIds {
 		for _, file := range files {
 			if strings.Contains(containerId, file.Name()) {
-				config, err := os.ReadFile(baseDir + "/" + file.Name() + "/config.v2.json")
+				config, err := os.ReadFile(containerBaseDir + "/" + file.Name() + "/config.v2.json")
 				if err != nil {
 					klog.Errorf("Failed to open file for container %v", containerId)
 					continue
 				}
 				pid, err := getPidFromJson(string(config))
-				path := fmt.Sprintf("%s/%s/root/sys/fs/cgroup", procDir, pid)
+				if err != nil {
+					klog.Infof("Failed to get PID from container config json file")
+				}
+				path := fmt.Sprintf("%s/%s/root/sys/fs/cgroup", procBaseDir, pid)
 				containerPidPath[containerIdToName[containerId]] = path
 				containerPid[containerIdToName[containerId]] = pid
 			}
 		}
 	}
 	localcache.AddNewPodInfo(podInfo, containerPid, containerPidPath)
-	return
 }

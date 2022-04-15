@@ -1,4 +1,4 @@
-module cgroup-psi-sc
+module psi-perf-ds
 
 go 1.17
 

@@ -10,8 +10,8 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func updatePerf(localcache *Cache, perfCollector *PerfCollector, labels map[string][]string) {
-	perfCollectorTicker := time.NewTicker(time.Duration(5) * time.Second)
+func updatePerf(localcache *Cache, perfCollector *PerfCollector, labels map[string][]string, interval int) {
+	perfCollectorTicker := time.NewTicker(time.Duration(interval) * time.Second)
 	for {
 		select {
 		case <-perfCollectorTicker.C:

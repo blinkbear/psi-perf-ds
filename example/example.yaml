@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: cgroup-monitor-sc
-  namespace: monitor
+  name: psi-perf-ds
+  namespace: prometheus
 spec:
   selector:
     matchLabels: 
-      app: cgroup-monitor
+      app: psi-perf
   template:
     metadata:
       labels:
-        app: cgroup-monitor
+        app: psi-perf
     spec:
-      serviceAccountName: cgroup-monitor-sc
+      serviceAccountName: psi-perf-ds
       terminationGracePeriodSeconds: 5
-      hostPid: true
+      hostPID: true
       hostNetwork: true
       nodeSelector:
           kubernetes.io/os: linux
@@ -23,8 +23,9 @@ spec:
           operator: Exists
           effect: NoSchedule
       containers:
-        - name: cgroup-monitor-sc
-          image: t.harbor.siat.ac.cn:100/library/cgroup-sc:v3.16
+        - name: psi-perf-ds
+          #image: t.harbor.siat.ac.cn:100/library/cgroup-sc:v3.16
+          image: 10.119.46.41:30003/library/psi-perf-ds:v3.0
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 2333
@@ -33,8 +34,7 @@ spec:
             name: metrics
           securityContext:
             capabilities:
-              add:
-              - SYS_PTRACE
+              add: ["SYS_PTRACE","SYS_ADMIN"]
           env:
             - name: PORT
               value: "2333"
@@ -42,10 +42,25 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            - name: PSI_INTERVAL
+              value: "5"
+            - name: PERF_INTERVAL
+              value: "5"
+            - name: CGROUP_BASE_DIR
+              value: "/root/cgroup"
+            - name: PROC_BASE_DIR
+              value: "/root/proc"
+            - name: DOCKER_BASE_DIR
+              value: "/root/docker"
+            - name: PERF_BASE_DIR
+              value: "/sys"
             - name: PERF_COLLECTOR_ENABLED
               value: "true"
+            - name: PSI_COLLECTOR_ENABLED
+              value: "false"
             - name: HW_PERF_LABELS
-              value: "Instructions"
+              value: "CPUCycles,Instructions,CacheRefs,CacheMisses"
+            
           resources:
             requests:
               cpu: 200m
@@ -91,13 +106,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cgroup-monitor-service #this will be the Domain name
-  namespace: monitoring
+  name: psi-perf-service #this will be the Domain name
+  namespace: prometheus
   labels:
-    app: cgroup-monitor
+    app: psi-perf
 spec:
   selector:
-    app: cgroup-monitor
+    app: psi-perf
   ports:
     - port: 2333
       protocol: TCP

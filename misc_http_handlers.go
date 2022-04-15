@@ -7,7 +7,7 @@ import (
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	_, err := io.WriteString(w, "CgroupV2 SideCar V1")
+	_, err := io.WriteString(w, "PSI Perf Monitor DaemonSet")
 	if err != nil {
 		return
 	}

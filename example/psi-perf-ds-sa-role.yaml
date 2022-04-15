@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: psi-perf-ds
+  namespace: prometheus
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: psi-perf-ds
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes/proxy
+  - nodes
+  - namespaces
+  - endpoints
+  - pods
+  - services
+  verbs: ["get","list","watch"]
+- apiGroups: [""]
+  resources:
+  - nodes/metrics
+  verbs: ["get"]
+- nonResourceURLs:
+  - /metrics
+  verbs: ["get"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: psi-perf-ds
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: psi-perf-ds
+subjects:
+- kind: ServiceAccount
+  name: psi-perf-ds
+  namespace: prometheus
