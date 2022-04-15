@@ -187,6 +187,16 @@ If you are not using some kind of service mesh make sure your Prometheus deploym
 
 In order to collect perf, we should keep the daemonset as an administrator, and share the host pid with container. These configuration can be set in pod YAML file, as a `spec.hostPid` and `spec.containers.securityContext`. The example.yaml shows how to configure them.
 
+And note that the kernel trace endpoints should be accessable. You can export the endpoints as follows:
+```
+vim /etc/sysctl.conf
+
+cat /etc/sysctl.conf
+kernel.perf_event_paranoid= -1
+
+sysctl -p /etc/sysctl.conf
+```
+
 Because the cost of perf collector is high, so we set an switch to enable and disable perf collector. And you can also set which perf metric should be collected. All of the supported perf metrics can be seen in project [perf-utils](https://github.com/hodgesds/perf-utils/blob/0517eb74ee7dd94e10d33088cac0df2f3342fd86/process_profile.go#L48), as follows
 
 Available HW_PERF_LABELS 
