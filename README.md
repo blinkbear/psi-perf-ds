@@ -26,9 +26,9 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/repo_name">
+  <!-- <a href="https://github.com/github_username/repo_name">
     <img src="https://golang.org/lib/godoc/images/go-logo-blue.svg" alt="Logo" width="80" height="80">
-  </a>
+  </a> -->
 
 <h3 align="center">CgroupV2 PSI and Perf Daemonset</h3>
 
