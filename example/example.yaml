@@ -25,7 +25,7 @@ spec:
       containers:
         - name: psi-perf-ds
           #image: t.harbor.siat.ac.cn:100/library/cgroup-sc:v3.16
-          image: 10.119.46.41:30003/library/psi-perf-ds:v3.0
+          image: k.harbor.siat.ac.cn:30003/library/psi-perf-ds:v3.0
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 2333
