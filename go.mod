@@ -1,4 +1,4 @@
-module containerd_test
+module psi-perf-ds 
 
 go 1.20
 
