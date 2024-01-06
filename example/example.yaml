@@ -25,7 +25,7 @@ spec:
       containers:
         - name: psi-perf-ds
           #image: t.harbor.siat.ac.cn:100/library/cgroup-sc:v3.16
-          image: k.harbor.siat.ac.cn:30003/library/psi-perf-ds:v3.0
+          image: k.harbor.siat.ac.cn/library/psi-perf-ds:v1.0
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 2333
@@ -42,6 +42,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            - name: CONTAINER_RUNTIME
+              value: "containerd"
+            - name: CONTAINER_RUNTIME_PATH
+              value: "unix://run/containerd/containerd.sock"
             - name: PSI_INTERVAL
               value: "5"
             - name: PERF_INTERVAL
@@ -85,6 +89,10 @@ spec:
               mountPropagation: HostToContainer
               mountPath: /sys
               readOnly: true
+            - name: containerdsock
+              mountPropagation: HostToContainer
+              mountPath: /run/containerd/
+              readOnly: true
       volumes:
         - name: dockerpath
           hostPath:
@@ -102,6 +110,9 @@ spec:
           hostPath:
             path: /sys
             type: Directory
+        - name: containerdsock
+          hostPath:
+            path: /run/containerd
 ---
 apiVersion: v1
 kind: Service
