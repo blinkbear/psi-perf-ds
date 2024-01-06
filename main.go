@@ -35,6 +35,8 @@ func checkSupportCGV2OrNot() bool {
 
 type BasicConfig struct {
 	CgroupBaseDir        string
+	ContainerRuntimePath string
+	ContainerRuntime     string
 	ProcBaseDir          string
 	DockerBaseDir        string
 	PerfBaseDir          string
@@ -48,6 +50,8 @@ type BasicConfig struct {
 func startLoader() *BasicConfig {
 	basicConfig := &BasicConfig{
 		CgroupBaseDir:        "/root/cgroup/",
+		ContainerRuntimePath: "unix://run/containerd/containerd.sock",
+		ContainerRuntime:     "containerd",
 		ProcBaseDir:          "/root/proc",
 		DockerBaseDir:        "/root/docker",
 		PerfBaseDir:          "/sys/",
@@ -79,6 +83,8 @@ func startLoader() *BasicConfig {
 		basicConfig.PerfInterval = perfInterval
 	}
 	basicConfig.CgroupBaseDir = os.Getenv("CGROUP_BASE_DIR")
+	basicConfig.ContainerRuntime = os.Getenv("CONTAINER_RUNTIME")
+	basicConfig.ContainerRuntimePath = os.Getenv("CONTAINER_RUNTIME_PATH")
 	basicConfig.ProcBaseDir = os.Getenv("PROC_BASE_DIR")
 	basicConfig.DockerBaseDir = os.Getenv("DOCKER_BASE_DIR")
 	basicConfig.PerfBaseDir = os.Getenv("PERF_BASE_DIR")
@@ -250,7 +256,11 @@ func addFunc(newPod *v1.Pod, localcache *Cache, localPerfCollector *PerfCollecto
 		return
 	}
 	podInfo := newPod.GetNamespace() + "/" + newPod.GetName()
-	findPid(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.DockerBaseDir)
+	if basicConfig.ContainerRuntime == "docker" {
+		findPid(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.DockerBaseDir)
+	} else if basicConfig.ContainerRuntime == "containerd" {
+		findPidInContainerd(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.ContainerRuntimePath)
+	}
 	podPidInfo := localcache.GetPodPidInfoFromPodInfo(podInfo)
 	if basicConfig.PerfCollectorEnabled {
 		startPerfCollector(localPerfCollector, podInfo, podPidInfo, basicConfig.PerfLabels)
@@ -264,6 +274,11 @@ func updateFunc(newPod *v1.Pod, localcache *Cache, localPerfCollector *PerfColle
 		return
 	}
 	podInfo := newPod.GetNamespace() + "/" + newPod.GetName()
+	if basicConfig.ContainerRuntime == "docker" {
+		findPid(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.DockerBaseDir)
+	} else if basicConfig.ContainerRuntime == "containerd" {
+		findPidInContainerd(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.ContainerRuntimePath)
+	}
 	findPid(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.DockerBaseDir)
 	podPidInfo := localcache.GetPodPidInfoFromPodInfo(podInfo)
 	if basicConfig.PerfCollectorEnabled {
