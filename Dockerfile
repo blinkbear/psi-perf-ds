@@ -10,4 +10,6 @@ RUN mv ./psi-perf-ds /root/
 
 FROM ubuntu
 COPY --from=builder /root/psi-perf-ds /usr/bin/psi-perf-ds
+RUN echo 'deb http://security.ubuntu.com/ubuntu jammy-security main' >> /etc/apt/sources.list
+RUN apt update && apt install -y libc6
 ENTRYPOINT ["psi-perf-ds"]
