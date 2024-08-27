@@ -10,13 +10,18 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func updatePerf(localcache *Cache, perfCollector *PerfCollector, labels map[string][]string, interval int) {
+func updatePerf(localcache *Cache, perfCollector *PerfCollector, labels map[string][]string, interval int, procBaseDir string) {
 	perfCollectorTicker := time.NewTicker(time.Duration(interval) * time.Second)
 	for {
 		select {
 		case <-perfCollectorTicker.C:
 			podPid := localcache.GetAllPodPidInfo()
 			_queryPerf(perfCollector, podPid, labels)
+			for podInfo := range localcache.GetAllPodPidInfo() {
+				updatePids(localcache, podInfo, procBaseDir)
+				podPidInfo := localcache.GetPodPidInfoFromPodInfo(podInfo)
+				startPerfCollector(perfCollector, podInfo, podPidInfo, labels)
+			}
 		}
 	}
 }
@@ -87,17 +92,27 @@ func removePerfCollector(perfCollector *PerfCollector, perfLabels map[string][]s
 			container_info := podInfo + "/" + container
 			hwprofiler, swprofiler, cacheprofiler := perfCollector.DeletePerfCollector(container_info)
 			if hwprofiler[container_info] != nil {
-				(*hwprofiler[container_info][pid]).Stop()
+				if *hwprofiler[container_info][pid] != nil {
+					(*hwprofiler[container_info][pid]).Stop()
+				}
 			}
 			if swprofiler[container_info] != nil {
-				(*swprofiler[container_info][pid]).Stop()
+				if *swprofiler[container_info][pid] != nil {
+					(*swprofiler[container_info][pid]).Stop()
+				}
 			}
 			if cacheprofiler[container_info] != nil {
-				(*cacheprofiler[container_info][pid]).Stop()
+				if *cacheprofiler[container_info][pid] != nil {
+					(*cacheprofiler[container_info][pid]).Stop()
+				}
 			}
 			for label, metricTypes := range perfLabels {
 				for _, metricType := range metricTypes {
-					_deletePerfMetricsInPrometheus(podNamespace, podName, container, pid, label, metricType)
+					klog.Infof("Deleting prom metrics: %v, %v", label, metricType)
+					// Notes: label might be "hw", "sw", "cache"
+					// So, based on the logics of _deletePerfMetricsInPrometheus
+					// label <-> metricType should be correct
+					_deletePerfMetricsInPrometheus(podNamespace, podName, container, pid, metricType, label)
 				}
 			}
 		}

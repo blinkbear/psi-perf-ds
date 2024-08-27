@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -90,6 +91,37 @@ func findPidInContainerd(localCache *Cache, pod *v1.Pod, procBaseDir string, con
 	localCache.AddNewPodInfo(podInfo, containerPid, containerPidPath)
 }
 
+func updatePids(localcache *Cache, podInfo string, procBaseDir string) {
+	containerPids := localcache.GetPodPidInfoFromPodInfo(podInfo)
+	newContainerPids := map[string][]string{}
+	newContainerPidPathes := map[string]map[string]string{}
+	for containerName, pids := range containerPids {
+		newContainerPids[containerName] = []string{}
+		newContainerPidPathes[containerName] = map[string]string{}
+		for _, pid := range pids {
+			newPids, err := getChildrenPid(pid)
+			if err != nil {
+				klog.Errorf("updatePids failed: %+v", err)
+				return
+			}
+			newContainerPids[containerName] = append(newContainerPids[containerName], newPids...)
+		}
+		encountered := make(map[string]bool)
+		result := []string{}
+		for _, pid := range newContainerPids[containerName] {
+			if !encountered[pid] {
+				encountered[pid] = true
+				result = append(result, pid)
+				path := fmt.Sprintf("%s/%s/root/sys/fs/cgroup", procBaseDir, pid)
+				newContainerPidPathes[containerName][pid] = path
+			}
+		}
+		klog.Infof("%s %s PIDs are : %s", podInfo, containerName, result)
+		newContainerPids[containerName] = result
+	}
+	localcache.AddNewPodInfo(podInfo, newContainerPids, nil)
+}
+
 func findPids(localcache *Cache, pod *v1.Pod, procBaseDir string, dockerBaseDir string) {
 	containerIds, containerIdToName := ListPods(pod)
 	// procBaseDir := "/root/proc"
@@ -107,6 +139,7 @@ func findPids(localcache *Cache, pod *v1.Pod, procBaseDir string, dockerBaseDir 
 		containerPidPath[containerIdToName[containerId]] = map[string]string{}
 		for _, file := range files {
 			if strings.Contains(containerId, file.Name()) {
+				klog.Infof("Investigating: %s", file.Name())
 				config, err := os.ReadFile(containerBaseDir + "/" + file.Name() + "/config.v2.json")
 				if err != nil {
 					klog.Errorf("Failed to open file for container %v", containerId)
@@ -117,7 +150,9 @@ func findPids(localcache *Cache, pod *v1.Pod, procBaseDir string, dockerBaseDir 
 					klog.Infof("Failed to get PID from container config json file")
 					continue
 				}
+				klog.Infof("%s %s PID is : %s", podInfo, containerIdToName[containerId], pid)
 				childrenPid, err := getChildrenPid(pid)
+				klog.Infof("%s %s PIDs are : %v", podInfo, containerIdToName[containerId], childrenPid)
 				if err != nil {
 					klog.Errorf("Failed to get children PID for container %v", containerId)
 					klog.Errorf("Caused by: %+v", err)
@@ -135,6 +170,10 @@ func findPids(localcache *Cache, pod *v1.Pod, procBaseDir string, dockerBaseDir 
 }
 
 func getChildrenPid(pid string) ([]string, error) {
+	if pid == "0" {
+		// When deleting pythonpi driver, it will get PID == 0
+		return nil, errors.New("Container is completed")
+	}
 	allChildPids := []string{pid}
 
 	cmd := exec.Command("pgrep", "-P", pid)

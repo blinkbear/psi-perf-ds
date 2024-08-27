@@ -97,17 +97,28 @@ func (p *PerfCollector) AddNewPerfCollector(containerInfo string, pid string, hw
 	if !exist {
 		p.podHwPerfCollector[containerInfo] = map[string]*perf_collector.HardwareProfiler{}
 	}
-	p.podHwPerfCollector[containerInfo][pid] = hwprofiler
+	_, exist = p.podHwPerfCollector[containerInfo][pid]
+	if !exist {
+		p.podHwPerfCollector[containerInfo][pid] = hwprofiler
+	}
+
 	_, exist = p.podSwPerfCollector[containerInfo]
 	if !exist {
 		p.podSwPerfCollector[containerInfo] = map[string]*perf_collector.SoftwareProfiler{}
 	}
-	p.podSwPerfCollector[containerInfo][pid] = swprofiler
+	_, exist = p.podSwPerfCollector[containerInfo][pid]
+	if !exist {
+		p.podSwPerfCollector[containerInfo][pid] = swprofiler
+	}
+
 	_, exist = p.podCachePerfCollector[containerInfo]
 	if !exist {
 		p.podCachePerfCollector[containerInfo] = map[string]*perf_collector.CacheProfiler{}
 	}
-	p.podCachePerfCollector[containerInfo][pid] = cacheprofiler
+	_, exist = p.podCachePerfCollector[containerInfo][pid]
+	if !exist{
+		p.podCachePerfCollector[containerInfo][pid] = cacheprofiler
+	}
 }
 
 // func (p *PerfCollector) GetHwPerfCollectorFromContainerInfo(containerInfo string) *perf_collector.HardwareProfiler {
