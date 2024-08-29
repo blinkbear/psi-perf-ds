@@ -201,7 +201,7 @@ func main() {
 		go updatePsi(localcache, basicConfig.CgroupBaseDir, basicConfig.PsiInterval)
 	}
 	if basicConfig.PerfCollectorEnabled {
-		go updatePerf(localcache, localPerfCollector, basicConfig.PerfLabels, basicConfig.PerfInterval)
+		go updatePerf(localcache, localPerfCollector, basicConfig.PerfLabels, basicConfig.PerfInterval, basicConfig.ProcBaseDir)
 	}
 	if !basicConfig.PsiCollectorEnabled && !basicConfig.PerfCollectorEnabled {
 		klog.Infof("All collectors are disabled")
@@ -257,11 +257,12 @@ func addFunc(newPod *v1.Pod, localcache *Cache, localPerfCollector *PerfCollecto
 	}
 	podInfo := newPod.GetNamespace() + "/" + newPod.GetName()
 	if basicConfig.ContainerRuntime == "docker" {
-		findPid(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.DockerBaseDir)
+		findPids(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.DockerBaseDir)
 	} else if basicConfig.ContainerRuntime == "containerd" {
 		findPidInContainerd(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.ContainerRuntimePath)
 	}
 	podPidInfo := localcache.GetPodPidInfoFromPodInfo(podInfo)
+	klog.Infof("%s got pid infos %v", podInfo, podPidInfo)
 	if basicConfig.PerfCollectorEnabled {
 		startPerfCollector(localPerfCollector, podInfo, podPidInfo, basicConfig.PerfLabels)
 	}
@@ -275,11 +276,11 @@ func updateFunc(newPod *v1.Pod, localcache *Cache, localPerfCollector *PerfColle
 	}
 	podInfo := newPod.GetNamespace() + "/" + newPod.GetName()
 	if basicConfig.ContainerRuntime == "docker" {
-		findPid(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.DockerBaseDir)
+		findPids(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.DockerBaseDir)
 	} else if basicConfig.ContainerRuntime == "containerd" {
 		findPidInContainerd(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.ContainerRuntimePath)
 	}
-	findPid(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.DockerBaseDir)
+	// findPids(localcache, newPod, basicConfig.ProcBaseDir, basicConfig.DockerBaseDir)
 	podPidInfo := localcache.GetPodPidInfoFromPodInfo(podInfo)
 	if basicConfig.PerfCollectorEnabled {
 		startPerfCollector(localPerfCollector, podInfo, podPidInfo, basicConfig.PerfLabels)
